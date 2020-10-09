@@ -32,7 +32,7 @@ const {
   getSimilarMoviesById
 } = require("./lib/data");
 const { getTrending, getTrendingGenre } = require("./lib/trending"); // provide trending functions
-const { search, searchActor, simpleSearch } = require("./lib/search"); // provide search functions
+const { search, searchActor, searchMovie, simpleSearch } = require("./lib/search"); // provide search functions
 const { getUpcoming } = require("./lib/upcoming"); // provide upcoming movies
 const { getActorData } = require("./lib/actor");
 
@@ -174,6 +174,7 @@ module.exports = {
   getCast,
   getActor,
   searchActor,
+  searchMovie,
   simpleSearch,
   ifError,
   request,
