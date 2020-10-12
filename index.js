@@ -5,39 +5,45 @@
  * use functions which return the promise only
  * */
 
-const d3TimeFormat = require("d3-time-format").timeFormat;
-const cheerio = require("cheerio"); // import cheerio for making use of css selector to get info
+const d3TimeFormat = require('d3-time-format').timeFormat;
+const cheerio = require('cheerio'); // import cheerio for making use of css selector to get info
 
 const {
   request,
   options,
   clearCache,
   stopCacheClear
-} = require("./lib/request"); // importing request for making get request
+} = require('./lib/request'); // importing request for making get request
 
-const { ifError } = require("./lib/error"); // error file
-const { getWinner } = require("./lib/awards"); // awards are provided
-const { getCast, getPoster, changeQuality } = require("./lib/photo"); // poster and cast info is given by this function
-const { getEpisodes } = require("./lib/episode");
+const { ifError } = require('./lib/error'); // error file
+const { getWinner } = require('./lib/awards'); // awards are provided
+const { getCast, getPoster, changeQuality } = require('./lib/photo'); // poster and cast info is given by this function
+const { getEpisodes } = require('./lib/episode');
 const {
   getRating,
   getGenre,
   getPro,
   getStory,
   getTitle,
+  getOriginalTitle,
   getRuntime,
   getYear,
   getEpisodeCount,
   getStars,
   getSimilarMoviesById
-} = require("./lib/data");
-const { getTrending, getTrendingGenre } = require("./lib/trending"); // provide trending functions
-const { search, searchActor, searchMovie, simpleSearch } = require("./lib/search"); // provide search functions
-const { getUpcoming } = require("./lib/upcoming"); // provide upcoming movies
-const { getActorData } = require("./lib/actor");
+} = require('./lib/data');
+const { getTrending, getTrendingGenre } = require('./lib/trending'); // provide trending functions
+const {
+  search,
+  searchActor,
+  searchMovie,
+  simpleSearch
+} = require('./lib/search'); // provide search functions
+const { getUpcoming } = require('./lib/upcoming'); // provide upcoming movies
+const { getActorData } = require('./lib/actor');
 
-const getMonthDay = d3TimeFormat("%m-%d");
-const BASE_URL = "https://www.imdb.com";
+const getMonthDay = d3TimeFormat('%m-%d');
+const BASE_URL = 'https://www.imdb.com';
 
 /**
  * scrapper - the function to get meta data about movie or tvshow
@@ -50,11 +56,13 @@ const BASE_URL = "https://www.imdb.com";
  */
 function scrapper(id) {
   return request(`${BASE_URL}/title/${id}/?ref_=nv_sr_1`)
-    .then(data => {
+    .then((data) => {
       const $ = cheerio.load(data);
 
       return {
+        id,
         ...getTitle($),
+        ...getOriginalTitle($),
         ...getRuntime($),
         ...getYear($),
         ...getStory($),
@@ -78,7 +86,7 @@ function scrapper(id) {
  */
 function awardsPage(id) {
   return request(`${BASE_URL}/title/${id}/awards?ref_=tt_awd`)
-    .then(data => {
+    .then((data) => {
       const $ = cheerio.load(data);
       return [getWinner(4, $), getWinner(7, $), getWinner(10, $)];
     })
@@ -95,7 +103,7 @@ function awardsPage(id) {
  */
 function episodesPage(id, season = 1) {
   return request(`https://www.imdb.com/title/${id}/episodes?season=${season}`)
-    .then(data => {
+    .then((data) => {
       const $ = cheerio.load(data);
       return { ...getEpisodes($) };
     })
@@ -114,7 +122,7 @@ function getStarsByBornDay(date = new Date()) {
   return request(
     `${BASE_URL}/search/name?birth_monthday=${monthday}&refine=birth_monthday&ref_=nv_cel_brn`
   )
-    .then(data => {
+    .then((data) => {
       const $ = cheerio.load(data);
       return getStars($);
     })
@@ -139,7 +147,7 @@ function getStarsBornToday() {
  */
 function getFull(id) {
   return Promise.all([scrapper(id), awardsPage(id), getCast(id)])
-    .then(data => {
+    .then((data) => {
       return { ...data[0], awards: data[1], ...data[2] };
     })
     .catch(ifError);
@@ -154,7 +162,7 @@ function getFull(id) {
  */
 function getActor(id) {
   return request(`https://www.imdb.com/name/${id}/?ref_=tt_cl_t1`)
-    .then(data => {
+    .then((data) => {
       const $ = cheerio.load(data);
       return getActorData($);
     })
